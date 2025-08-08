@@ -3,10 +3,22 @@ set -e
 
 # Wait for database to be ready
 echo "Waiting for database connection..."
-while ! mysqladmin ping -h"$MYSQLHOST" -P"$MYSQLPORT" --silent; do
-    sleep 2
+max_tries=30
+counter=0
+while ! mysqladmin ping -h"$MYSQLHOST" -P"$MYSQLPORT" --silent 2>/dev/null; do
+    counter=$((counter+1))
+    if [ $counter -gt $max_tries ]; then
+        echo "Failed to connect to database after $max_tries attempts"
+        exit 1
+    fi
+    echo "Waiting for database... (attempt $counter/$max_tries)"
+    sleep 3
 done
 echo "Database is ready!"
+
+# Run composer post scripts
+echo "Running composer post-install scripts..."
+composer run-script post-install-cmd --no-interaction || true
 
 # Generate APP_KEY if not set
 if [ -z "$APP_KEY" ]; then
