@@ -39,6 +39,8 @@ php artisan config:clear
 php artisan cache:clear
 php artisan route:clear
 php artisan view:clear
+# Clear translation cache to force reload Russian locale
+php artisan lang:cache || true
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
