@@ -1,0 +1,87 @@
+FROM php:8.1-apache
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    libzip-dev \
+    libgd-dev \
+    libldap2-dev \
+    libmcrypt-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    default-mysql-client \
+    supervisor \
+    cron \
+    && rm -rf /var/lib/apt/lists/*
+
+# Configure PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg
+RUN docker-php-ext-configure ldap --with-libdir=lib/x86_64-linux-gnu/
+
+# Install PHP extensions
+RUN docker-php-ext-install \
+    pdo_mysql \
+    mbstring \
+    exif \
+    pcntl \
+    bcmath \
+    gd \
+    zip \
+    ldap \
+    mysqli
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Enable Apache modules
+RUN a2enmod rewrite headers
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Copy Snipe-IT files
+COPY snipe-it/ /var/www/html/
+
+# Create storage directories
+RUN mkdir -p /var/www/html/storage/framework/sessions \
+    && mkdir -p /var/www/html/storage/framework/views \
+    && mkdir -p /var/www/html/storage/framework/cache \
+    && mkdir -p /var/www/html/storage/logs \
+    && mkdir -p /var/www/html/storage/app/backups \
+    && mkdir -p /var/www/html/storage/app/public \
+    && mkdir -p /var/www/html/storage/private_uploads \
+    && mkdir -p /var/www/html/public/uploads
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/bootstrap/cache \
+    && chmod -R 755 /var/www/html/public/uploads
+
+# Copy environment file
+COPY .env.railway /var/www/html/.env
+
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader --no-interaction
+
+# Generate application key if not set
+RUN php artisan key:generate --force
+
+# Apache configuration
+COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
+
+# Expose port
+EXPOSE 80
+
+# Create startup script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["apache2-foreground"]

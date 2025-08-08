@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  snipe-it:
+    build:
+      context: .
+      dockerfile: Dockerfile.railway
+    ports:
+      - "8000:80"
+    environment:
+      - APP_KEY=base64:CHANGEME_GENERATE_NEW_KEY
+      - APP_URL=http://localhost:8000
+      - APP_ENV=production
+      - APP_DEBUG=false
+      - DB_CONNECTION=mysql
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=snipeit
+      - DB_USERNAME=snipeit
+      - DB_PASSWORD=changeme123
+      - MYSQLHOST=mysql
+      - MYSQLPORT=3306
+      - MYSQLDATABASE=snipeit
+      - MYSQLUSER=snipeit
+      - MYSQLPASSWORD=changeme123
+    depends_on:
+      - mysql
+    volumes:
+      - snipe-uploads:/var/www/html/public/uploads
+      - snipe-storage:/var/www/html/storage
+    networks:
+      - snipe-net
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword123
+      - MYSQL_DATABASE=snipeit
+      - MYSQL_USER=snipeit
+      - MYSQL_PASSWORD=changeme123
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - snipe-net
+
+volumes:
+  mysql-data:
+  snipe-uploads:
+  snipe-storage:
+
+networks:
+  snipe-net:
+    driver: bridge

@@ -1,0 +1,73 @@
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Dependency directories
+/vendor/
+node_modules/
+
+# Laravel specific
+/public/hot
+/public/storage
+/storage/*.key
+/storage/app/*
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+!/storage/app/public/.gitignore
+!/storage/framework/cache/.gitignore
+!/storage/framework/sessions/.gitignore
+!/storage/framework/testing/.gitignore
+!/storage/framework/views/.gitignore
+!/storage/logs/.gitignore
+
+# Laravel Mix
+/public/css/
+/public/js/
+/public/mix-manifest.json
+
+# Backups
+*.sql
+*.sql.gz
+storage/app/backups/*
+
+# Cache and temporary files
+bootstrap/cache/*
+!bootstrap/cache/.gitignore
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Testing
+.phpunit.result.cache
+.phpunit.cache
+/coverage
+
+# Uploaded files (keep directory structure but not files)
+public/uploads/*
+!public/uploads/.gitkeep
+storage/private_uploads/*
+!storage/private_uploads/.gitkeep
+
+# Database
+*.sqlite
+*.sqlite3
+
+# Compiled files
+/public/build/
+
+# Railway and swarm specific
+.swarm/
+.claude-flow/
