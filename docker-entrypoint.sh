@@ -1,6 +1,14 @@
 #!/bin/bash
 set -e
 
+# Set PORT for Railway
+export PORT=${PORT:-80}
+echo "Starting on port: $PORT"
+
+# Update Apache to listen on the correct port
+sed -i "s/\${PORT}/$PORT/g" /etc/apache2/sites-available/000-default.conf
+sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf
+
 # Wait for database to be ready
 echo "Waiting for database connection..."
 max_tries=30

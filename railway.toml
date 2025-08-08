@@ -4,17 +4,8 @@ dockerfilePath = "Dockerfile.railway"
 
 [deploy]
 numReplicas = 1
-healthcheckPath = "/login"
-healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
-
-[[services]]
-name = "snipe-it"
-    
-[[services.ports]]
-port = 80
-targetPort = 80
 
 [services.envs]
 APP_ENV = "production"
