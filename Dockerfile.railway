@@ -73,8 +73,9 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction --no-script
 # Generate application key if not set
 RUN php artisan key:generate --force || true
 
-# Apache configuration - simplified
-RUN echo '<VirtualHost *:80>\n\
+# Apache configuration for Railway (port 8080)
+RUN echo 'Listen 8080' > /etc/apache2/ports.conf && \
+    echo '<VirtualHost *:8080>\n\
     ServerAdmin webmaster@localhost\n\
     DocumentRoot /var/www/html/public\n\
     <Directory /var/www/html/public>\n\

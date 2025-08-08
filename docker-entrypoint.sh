@@ -1,18 +1,8 @@
 #!/bin/bash
 set -e
 
-# Railway provides PORT environment variable
-PORT=${PORT:-80}
-echo "Starting on port: $PORT"
-
-# Configure Apache to listen on the correct port
-if [ "$PORT" != "80" ]; then
-    # Update ports.conf
-    sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf
-    # Update VirtualHost
-    sed -i "s/:80/:$PORT/g" /etc/apache2/sites-available/000-default.conf
-    sed -i "s/\*:80/*:$PORT/g" /etc/apache2/sites-available/000-default.conf
-fi
+# Railway provides PORT environment variable (should be 8080)
+echo "Starting on port: ${PORT:-8080}"
 
 # Wait for database to be ready
 echo "Waiting for database connection..."
