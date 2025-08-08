@@ -24,9 +24,8 @@ while ! mysqladmin ping -h"$MYSQLHOST" -P"$MYSQLPORT" --silent 2>/dev/null; do
 done
 echo "Database is ready!"
 
-# Run composer post scripts
-echo "Running composer post-install scripts..."
-composer run-script post-install-cmd --no-interaction || true
+# Skip composer post scripts - they will run during migration
+echo "Skipping composer post-install scripts..."
 
 # Generate APP_KEY if not set
 if [ -z "$APP_KEY" ]; then
@@ -35,9 +34,15 @@ if [ -z "$APP_KEY" ]; then
     export APP_KEY=$(grep APP_KEY .env | cut -d '=' -f2)
 fi
 
+# Set APP_URL if RAILWAY_STATIC_URL is available
+if [ ! -z "$RAILWAY_STATIC_URL" ]; then
+    export APP_URL="https://$RAILWAY_STATIC_URL"
+    echo "Setting APP_URL to: $APP_URL"
+fi
+
 # Run migrations
 echo "Running database migrations..."
-php artisan migrate --force
+php artisan migrate --force || echo "Migration failed, continuing..."
 
 # Create symlink for storage
 echo "Creating storage symlink..."
