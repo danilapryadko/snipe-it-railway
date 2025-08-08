@@ -1,13 +1,16 @@
 #!/bin/bash
 set -e
 
-# Set PORT for Railway
+# Set PORT for Railway  
 export PORT=${PORT:-80}
 echo "Starting on port: $PORT"
 
 # Update Apache to listen on the correct port
-sed -i "s/\${PORT}/$PORT/g" /etc/apache2/sites-available/000-default.conf
-sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf
+if [ "$PORT" != "80" ]; then
+    sed -i "s/:80/:$PORT/g" /etc/apache2/sites-available/000-default.conf
+    sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf
+    sed -i "s/\*:80/*:$PORT/g" /etc/apache2/sites-available/000-default.conf
+fi
 
 # Wait for database to be ready
 echo "Waiting for database connection..."
@@ -46,7 +49,7 @@ php artisan migrate --force || echo "Migration failed, continuing..."
 
 # Create symlink for storage
 echo "Creating storage symlink..."
-php artisan storage:link
+php artisan storage:link || echo "Storage link already exists"
 
 # Clear and optimize
 echo "Optimizing application..."
