@@ -1,14 +1,18 @@
 #!/bin/bash
 set -e
 
-# Set PORT for Railway  
-export PORT=${PORT:-80}
+# Railway provides PORT environment variable
+PORT=${PORT:-80}
 echo "Starting on port: $PORT"
 
-# Clear any existing Listen directives and set the correct port
-echo "Listen $PORT" > /etc/apache2/ports.conf
-sed -i "s/:80/:$PORT/g" /etc/apache2/sites-available/000-default.conf
-sed -i "s/\*:80/*:$PORT/g" /etc/apache2/sites-available/000-default.conf
+# Configure Apache to listen on the correct port
+if [ "$PORT" != "80" ]; then
+    # Update ports.conf
+    sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf
+    # Update VirtualHost
+    sed -i "s/:80/:$PORT/g" /etc/apache2/sites-available/000-default.conf
+    sed -i "s/\*:80/*:$PORT/g" /etc/apache2/sites-available/000-default.conf
+fi
 
 # Wait for database to be ready
 echo "Waiting for database connection..."
@@ -24,16 +28,6 @@ while ! mysqladmin ping -h"$MYSQLHOST" -P"$MYSQLPORT" --silent 2>/dev/null; do
     sleep 3
 done
 echo "Database is ready!"
-
-# Skip composer post scripts - they will run during migration
-echo "Skipping composer post-install scripts..."
-
-# Generate APP_KEY if not set
-if [ -z "$APP_KEY" ]; then
-    echo "Generating APP_KEY..."
-    php artisan key:generate --force
-    export APP_KEY=$(grep APP_KEY .env | cut -d '=' -f2)
-fi
 
 # Set APP_URL if RAILWAY_STATIC_URL is available
 if [ ! -z "$RAILWAY_STATIC_URL" ]; then

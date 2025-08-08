@@ -71,13 +71,20 @@ COPY .env.railway /var/www/html/.env
 RUN composer install --no-dev --optimize-autoloader --no-interaction --no-scripts
 
 # Generate application key if not set
-RUN php artisan key:generate --force
+RUN php artisan key:generate --force || true
 
-# Apache configuration
-COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
-
-# Expose port
-EXPOSE 80
+# Apache configuration - simplified
+RUN echo '<VirtualHost *:80>\n\
+    ServerAdmin webmaster@localhost\n\
+    DocumentRoot /var/www/html/public\n\
+    <Directory /var/www/html/public>\n\
+        Options Indexes FollowSymLinks\n\
+        AllowOverride All\n\
+        Require all granted\n\
+    </Directory>\n\
+    ErrorLog ${APACHE_LOG_DIR}/error.log\n\
+    CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
+</VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
 # Create startup script
 COPY docker-entrypoint.sh /usr/local/bin/
