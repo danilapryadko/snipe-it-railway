@@ -5,12 +5,10 @@ set -e
 export PORT=${PORT:-80}
 echo "Starting on port: $PORT"
 
-# Update Apache to listen on the correct port
-if [ "$PORT" != "80" ]; then
-    sed -i "s/:80/:$PORT/g" /etc/apache2/sites-available/000-default.conf
-    sed -i "s/Listen 80/Listen $PORT/g" /etc/apache2/ports.conf
-    sed -i "s/\*:80/*:$PORT/g" /etc/apache2/sites-available/000-default.conf
-fi
+# Clear any existing Listen directives and set the correct port
+echo "Listen $PORT" > /etc/apache2/ports.conf
+sed -i "s/:80/:$PORT/g" /etc/apache2/sites-available/000-default.conf
+sed -i "s/\*:80/*:$PORT/g" /etc/apache2/sites-available/000-default.conf
 
 # Wait for database to be ready
 echo "Waiting for database connection..."

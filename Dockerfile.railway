@@ -76,8 +76,8 @@ RUN php artisan key:generate --force
 # Apache configuration
 COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
 
-# Expose port (Railway uses PORT env variable)
-EXPOSE ${PORT:-80}
+# Expose port
+EXPOSE 80
 
 # Create startup script
 COPY docker-entrypoint.sh /usr/local/bin/
